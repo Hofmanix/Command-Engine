@@ -14,6 +14,7 @@ using Android.Util;
 using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
+using AndroidX.RecyclerView.Widget;
 using Controls.Shared;
 using Java.Lang;
 
@@ -21,10 +22,11 @@ namespace CommandEngine.Controls.Droid
 {
     public class Commander : FrameLayout, ICommander
     {
-        TextView _previousText;
+        RecyclerView _messagesHistory;
+        List<string> _historyMessages;
+        HistoryMessagesAdapter _historyMessagesAdapter;
         TextView _currentLineText;
         EditText _currentText;
-        MaxHeightScrollView _commanderScrollView;
         private LinearLayout _commanderCurrentLineView;
         private readonly Queue<CommanderEvent> _eventsQueue = new Queue<CommanderEvent>();
 
@@ -47,26 +49,18 @@ namespace CommandEngine.Controls.Droid
         private void Initialize()
         {
             LayoutInflater.From(Context).Inflate(Resource.Layout.commander, this);
-            _previousText = FindViewById<TextView>(Resource.Id.commander_previous_text);
+            _messagesHistory = FindViewById<RecyclerView>(Resource.Id.messages_history);
             _currentText = FindViewById<EditText>(Resource.Id.commander_current_text);
-            _commanderScrollView = FindViewById<MaxHeightScrollView>(Resource.Id.commander_scroll_view);
             _currentLineText = FindViewById<TextView>(Resource.Id.commander_current_line_text);
             _commanderCurrentLineView = FindViewById<LinearLayout>(Resource.Id.commander_current_line_view);
+
+            _historyMessages = new List<string> { string.Empty };
+            _historyMessagesAdapter = new HistoryMessagesAdapter(_historyMessages);
+            _messagesHistory.SetAdapter(_historyMessagesAdapter);
 
             _currentText.KeyPress += OnKey;
             _currentText.EditorAction += OnEditorAction;
             _commanderCurrentLineView.LayoutChange += (sender, args) => Console.WriteLine(IsCurrentLineVisible());
-        }
-
-        protected override void OnLayout(bool changed, int left, int top, int right, int bottom)
-        {
-            base.OnLayout(changed, left, top, right, bottom);
-            if (Height != 0 && _currentLineText.Height != 0)
-            {
-                _commanderScrollView.MaxHeight = Height - _currentLineText.Height;
-            }
-            Console.WriteLine(Height);
-            Console.WriteLine(_currentLineText.Height);
         }
 
         #endregion
@@ -75,7 +69,8 @@ namespace CommandEngine.Controls.Droid
 
         public void Clear()
         {
-            _previousText.Text = "";
+            _historyMessages.Clear();
+            _historyMessagesAdapter.NotifyDataSetChanged();
         }
 
         public Task<string> ReadCommand()
@@ -104,6 +99,8 @@ namespace CommandEngine.Controls.Droid
 
         public void Write(string message)
         {
+            var lines = message.Split(System.Environment.NewLine);
+
             if (message.EndsWith(System.Environment.NewLine))
             {
                 _previousText.Append(message);
@@ -119,11 +116,6 @@ namespace CommandEngine.Controls.Droid
                     WriteLine(line);
                 }
             }
-
-            _commanderScrollView.Post(() =>
-            {
-                _commanderScrollView.FullScroll(FocusSearchDirection.Down);
-            });
         }
 
         public void WriteLine(string message)
