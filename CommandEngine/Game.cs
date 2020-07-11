@@ -32,7 +32,7 @@ namespace CommandEngine
             }
         }
 
-        public GameOptions GameOptions { get; } = new GameOptions();
+        public IGameOptions GameOptions { get; }
 
         public IArea CurrentArea { get; private set; }
 
@@ -60,9 +60,10 @@ namespace CommandEngine
 
         private string[] _currentParameters;
 
-        public Game(ICommander console, IServiceProvider gameServices, CommandMap allCommands, CommandMap globalCommands, ISet<Type> areas)
+        public Game(ICommander console, IServiceProvider gameServices, CommandMap allCommands, CommandMap globalCommands, ISet<Type> areas, IGameOptions gameOptions)
         {
             Commander = console;
+            GameOptions = gameOptions;
             _gameServices = gameServices;
             _allCommands = allCommands;
             _globalCommands = globalCommands;
@@ -104,10 +105,6 @@ namespace CommandEngine
         {
             while (IsRunning)
             {
-                if (GameOptions.ShowArea)
-                {
-                    Commander.Write($"{CurrentArea.GetName()} > ");
-                }
                 var input = await Commander.ReadCommand();
                 if (string.IsNullOrWhiteSpace(input))
                 {

@@ -48,7 +48,7 @@ namespace CommandEngine
         /// <summary>
         /// Options set at the start
         /// </summary>
-        GameOptions GameOptions { get; }
+        IGameOptions GameOptions { get; }
 
         /// <summary>
         /// Currently running command in game

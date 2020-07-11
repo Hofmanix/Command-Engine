@@ -15,9 +15,9 @@ namespace CommandEngine.Controls.Droid
 {
     class HistoryMessagesAdapter : RecyclerView.Adapter
     {
-        private readonly List<string> _messages;
+        private readonly List<Message> _messages;
 
-        public HistoryMessagesAdapter(List<string> messages)
+        public HistoryMessagesAdapter(List<Message> messages)
         {
             _messages = messages;
         }
@@ -26,23 +26,14 @@ namespace CommandEngine.Controls.Droid
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             var historyMessageHolder = holder as HistoryMessageViewHolder;
-            historyMessageHolder.MessageText.Text = _messages[position];
+            historyMessageHolder.MessageText.Text = _messages[position].Text;
         }
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            var messageTextView = new TextView(parent.Context);
+            var messageTextView = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.commander_message, parent, false);
             var holder = new HistoryMessageViewHolder(messageTextView);
             return holder;
-        }
-    }
-
-    public class HistoryMessageViewHolder : RecyclerView.ViewHolder
-    {
-        public TextView MessageText { get; }
-        public HistoryMessageViewHolder(TextView view) : base(view)
-        {
-            MessageText = view;
         }
     }
 }

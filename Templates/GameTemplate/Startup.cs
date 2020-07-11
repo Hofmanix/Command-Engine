@@ -19,7 +19,7 @@ namespace CommandEngine.Console
         {
             game.UseAreaAttributeMapping();
             game.UseHelp();
-            game.OnStart += () => { game.Commander.WriteLine("Hello Game World"); };
+            game.OnStart += () => { game.Commander.Write("Hello Game World"); };
         }
 
         public void ConfigureServices(IServiceCollection services)

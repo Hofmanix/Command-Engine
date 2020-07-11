@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@ using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using CommandEngine.Extensions;
 using Controls.Shared;
 using Java.Lang;
 
@@ -22,13 +24,21 @@ namespace CommandEngine.Controls.Droid
 {
     public class Commander : FrameLayout, ICommander
     {
-        RecyclerView _messagesHistory;
-        List<string> _historyMessages;
+        RecyclerView _historyMessagesRecycler;
+        List<Message> _historyMessagesList;
         HistoryMessagesAdapter _historyMessagesAdapter;
-        TextView _currentLineText;
+        TextView _locationText;
+        TextView _dividerText;
         EditText _currentText;
         private LinearLayout _commanderCurrentLineView;
         private readonly Queue<CommanderEvent> _eventsQueue = new Queue<CommanderEvent>();
+        private IGame _game;
+
+        public string Location
+        {
+            get => _locationText.Text;
+            set => _locationText.Text = value;
+        }
 
         #region Initialization
         public Commander(Context context) : base(context)
@@ -49,14 +59,16 @@ namespace CommandEngine.Controls.Droid
         private void Initialize()
         {
             LayoutInflater.From(Context).Inflate(Resource.Layout.commander, this);
-            _messagesHistory = FindViewById<RecyclerView>(Resource.Id.messages_history);
+            _historyMessagesRecycler = FindViewById<RecyclerView>(Resource.Id.messages_history);
             _currentText = FindViewById<EditText>(Resource.Id.commander_current_text);
-            _currentLineText = FindViewById<TextView>(Resource.Id.commander_current_line_text);
+            _locationText = FindViewById<TextView>(Resource.Id.commander_location_text);
+            _dividerText = FindViewById<TextView>(Resource.Id.commander_location_divider);
             _commanderCurrentLineView = FindViewById<LinearLayout>(Resource.Id.commander_current_line_view);
 
-            _historyMessages = new List<string> { string.Empty };
-            _historyMessagesAdapter = new HistoryMessagesAdapter(_historyMessages);
-            _messagesHistory.SetAdapter(_historyMessagesAdapter);
+            _historyMessagesList = new List<Message>();
+            _historyMessagesAdapter = new HistoryMessagesAdapter(_historyMessagesList);
+            _historyMessagesRecycler.SetAdapter(_historyMessagesAdapter);
+            _historyMessagesRecycler.SetLayoutManager(new LinearLayoutManager(this.Context));
 
             _currentText.KeyPress += OnKey;
             _currentText.EditorAction += OnEditorAction;
@@ -69,7 +81,7 @@ namespace CommandEngine.Controls.Droid
 
         public void Clear()
         {
-            _historyMessages.Clear();
+            _historyMessagesList.Clear();
             _historyMessagesAdapter.NotifyDataSetChanged();
         }
 
@@ -80,47 +92,30 @@ namespace CommandEngine.Controls.Droid
             return task.Task;
         }
 
-        public Task<KeyInfo> ReadKey()
+        public void Write(Message message)
         {
-            var task = new TaskCompletionSource<KeyInfo>();
-            _eventsQueue.Enqueue(new CommanderEvent(task));
-            return task.Task;
+            _historyMessagesList.Add(message);
+            _historyMessagesAdapter.NotifyDataSetChanged();
+            _historyMessagesRecycler.ScrollToPosition(_historyMessagesList.Count - 1);
         }
 
-        public void UpdateLine(int lineNumber, string message)
+        public void Update(int messageIndex, Message message)
         {
-            throw new PlatformNotSupportedException();
+            if (_historyMessagesList.Count <= messageIndex) return;
+
+            _historyMessagesList[messageIndex] = message;
+            _historyMessagesAdapter.NotifyItemChanged(messageIndex);
+            _historyMessagesRecycler.ScrollToPosition(messageIndex);
         }
 
-        public void UpdateLine(int lineNumber, Func<string, string> messageBuilder)
+        public void Update(int messageIndex, Func<Message, Message> messageBuilder)
         {
-            throw new PlatformNotSupportedException();
-        }
+            var oldMessage = _historyMessagesList.Count <= messageIndex
+                ? null
+                : _historyMessagesList[messageIndex];
 
-        public void Write(string message)
-        {
-            var lines = message.Split(System.Environment.NewLine);
-
-            if (message.EndsWith(System.Environment.NewLine))
-            {
-                _previousText.Append(message);
-            }
-            else
-            {
-                var lines = message.Split(System.Environment.NewLine);
-                if (!lines.Any()) return;
-
-                _currentLineText.Text = lines.Last();
-                foreach (var line in lines.Take(lines.Length - 1))
-                {
-                    WriteLine(line);
-                }
-            }
-        }
-
-        public void WriteLine(string message)
-        {
-            Write($"{message}{System.Environment.NewLine}");
+            var newMessage = messageBuilder(oldMessage);
+            Update(messageIndex, newMessage);
         }
 
         #endregion
@@ -171,7 +166,7 @@ namespace CommandEngine.Controls.Droid
         {
             var text = _currentText.Text;
             _currentText.Text = "";
-            WriteLine(_currentLineText.Text + text);
+            Write(new Message($"{(_game.GameOptions.ShowArea ? $"{_locationText.Text} {_dividerText.Text} " : "")}{text}"));
             if (_eventsQueue.Any() && _eventsQueue.Peek().Type == CommanderEventType.ReadLine)
             {
                 _eventsQueue.Dequeue().SetResult(text);
@@ -187,6 +182,44 @@ namespace CommandEngine.Controls.Droid
             var bottom = top + _currentText.Height;
 
             return scrollBounds.Top < top && scrollBounds.Bottom > bottom;
+        }
+
+        public void OnGameCreated(IGame game)
+        {
+            _game = game;
+            _game.GameOptions.PropertyChanged += GameOptionsChanged;
+            _game.AreaEntered += GameAreaEntered;
+            _game.AreaExited += GameAreaExited;
+        }
+
+        private void GameOptionsChanged(object sender, PropertyChangedEventArgs args)
+        {
+            switch (args.PropertyName)
+            {
+                case nameof(IGameOptions.ShowArea):
+                    _locationText.Visibility = _game.GameOptions.ShowArea ? ViewStates.Visible : ViewStates.Gone;
+                    _dividerText.Visibility = _game.GameOptions.ShowArea ? ViewStates.Visible : ViewStates.Gone;
+                    break;
+                case nameof(IGameOptions.AreaDivider):
+                    _dividerText.Text = _game.GameOptions.AreaDivider;
+                    break;
+            }
+        }
+
+        private void GameAreaExited(IArea oldArea, IArea newArea, ICommand command)
+        {
+            _locationText.Visibility = ViewStates.Gone;
+            _dividerText.Visibility = ViewStates.Gone;
+        }
+
+        private void GameAreaEntered(IArea oldArea, IArea newArea, ICommand command)
+        {
+            _locationText.Text = newArea.GetName();
+            if (_game.GameOptions.ShowArea)
+            {
+                _locationText.Visibility = ViewStates.Visible;
+                _dividerText.Visibility = ViewStates.Visible;
+            }
         }
     }
 }

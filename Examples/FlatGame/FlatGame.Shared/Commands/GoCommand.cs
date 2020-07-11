@@ -29,7 +29,7 @@ namespace FlatGame.Shared.Commands
         {
             if (!parameters.Any())
             {
-                Commander.WriteLine("Don't know where to go.");
+                Commander.Write("Don't know where to go.");
                 return "";
             }
 
@@ -40,12 +40,12 @@ namespace FlatGame.Shared.Commands
                 if (_roomsMap.TryGetValue(roomName, out var room) && area.Neighbors.Contains(room.GetType()))
                 {
                     Game.ChangeArea(room);
-                    Commander.WriteLine("You moved to " + roomName);
+                    Commander.Write("You moved to " + roomName);
                 }
                 else
                 {
-                    Commander.WriteLine($"Can't go to {roomName} because it's not {Area.GetName()}'s neighbor.");
-                    Commander.WriteLine($"Available neighbors: {string.Join(", ", area.Neighbors.Select(neighbor => neighbor.GetAreaName()))}");
+                    Commander.Write($"Can't go to {roomName} because it's not {Area.GetName()}'s neighbor.");
+                    Commander.Write($"Available neighbors: {string.Join(", ", area.Neighbors.Select(neighbor => neighbor.GetAreaName()))}");
                 }
             }
 

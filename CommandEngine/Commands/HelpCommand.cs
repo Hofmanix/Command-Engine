@@ -21,7 +21,7 @@ namespace CommandEngine.Commands
 
         public void Process(string[] parameters)
         {
-            Commander.WriteLine(_helpService.GetHelpTextForArea(Area));
+            Commander.Write(_helpService.GetHelpTextForArea(Area));
         }
     }
 }

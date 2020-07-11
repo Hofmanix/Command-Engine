@@ -21,7 +21,7 @@ namespace FlatGame.Shared
         {
             game.UseAreaAttributeMapping();
             game.UseHelp();
-            game.OnStart += () => { game.Commander.WriteLine(Strings.Greeting); };
+            game.OnStart += () => { game.Commander.Write(Strings.Greeting); };
         }
 
         public void ConfigureServices(IServiceCollection services)

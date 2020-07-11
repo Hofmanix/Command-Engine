@@ -38,7 +38,7 @@ namespace CommandEngine
                 {
                     if (namedMember is PropertyInfo namedProperty)
                     {
-                        Commander.WriteLine(namedProperty.GetValue(this).ToString());
+                        Commander.Write(namedProperty.GetValue(this).ToString());
                     }
                     else
                     {

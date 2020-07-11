@@ -44,9 +44,9 @@ namespace CommandEngine
             return this;
         }
 
-        public IGameBuilder AddCommander<TConsole>() where TConsole: class, ICommander
+        public IGameBuilder AddCommander<TCommander>() where TCommander: class, ICommander
         {
-            _serviceCollection.AddCommander<TConsole>();
+            _serviceCollection.AddCommander<TCommander>();
             return this;
         }
 
@@ -56,18 +56,22 @@ namespace CommandEngine
             return this;
         }
 
-        public IGame Build()
+        public IGame Build(IGameOptions gameOptions = null)
         {
             LoadAreas();
             LoadCommands();
             _startup.ConfigureCommands(this);
 
-            _serviceCollection.AddSingleton<IGame, Game>(services => new Game(services.GetService<ICommander>(), GameServices, _commands, _globalCommands, _areas));
+            _serviceCollection.AddSingleton<IGame, Game>(services => new Game(services.GetService<ICommander>(), GameServices, _commands, _globalCommands, _areas, gameOptions ?? new GameOptions()));
 
             GameServices = _serviceCollection.BuildServiceProvider();
 
-            _startup.ConfigureGame(GameServices.GetService<IGame>());
-            return GameServices.GetService<IGame>();
+            var game = GameServices.GetService<IGame>();
+
+            _startup.ConfigureGame(game);
+            GameServices.GetRequiredService<ICommander>().OnGameCreated(game);
+
+            return game;
         }
 
         public IGameBuilder AddCommand(Type commandType)

@@ -21,7 +21,7 @@ namespace FlatGame.Shared.Commands
         {
             if (parameters.Length != 1)
             {
-                Commander.WriteLine("Don't know what to take");
+                Commander.Write("Don't know what to take");
                 return;
             }
 
@@ -29,12 +29,12 @@ namespace FlatGame.Shared.Commands
             var item = ((Room)Area).Items.FirstOrDefault(i => i.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
             if (item == null)
             {
-                Commander.WriteLine("Can't find item in this room.");
+                Commander.Write("Can't find item in this room.");
                 return;
             }
             if (!item.Takeable)
             {
-                Commander.WriteLine("Can't take this item.");
+                Commander.Write("Can't take this item.");
                 return;
             }
 

@@ -49,7 +49,8 @@ namespace CommandEngine
         /// <summary>
         /// Creates game instance which will run game and adds it to the services as singleton, calls Startup ConfigureGame function for this game and returns it
         /// </summary>
+        /// <param name="gameOptions">Game options class can be specified as options for game, if not, default game options are used</param>
         /// <returns></returns>
-        IGame Build();
+        IGame Build(IGameOptions gameOptions = null);
     }
 }
