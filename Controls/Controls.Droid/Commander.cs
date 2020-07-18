@@ -25,7 +25,7 @@ namespace CommandEngine.Controls.Droid
     public class Commander : FrameLayout, ICommander
     {
         RecyclerView _historyMessagesRecycler;
-        List<Message> _historyMessagesList;
+        List<CommandText> _historyMessagesList;
         HistoryMessagesAdapter _historyMessagesAdapter;
         TextView _locationText;
         TextView _dividerText;
@@ -65,7 +65,7 @@ namespace CommandEngine.Controls.Droid
             _dividerText = FindViewById<TextView>(Resource.Id.commander_location_divider);
             _commanderCurrentLineView = FindViewById<LinearLayout>(Resource.Id.commander_current_line_view);
 
-            _historyMessagesList = new List<Message>();
+            _historyMessagesList = new List<CommandText>();
             _historyMessagesAdapter = new HistoryMessagesAdapter(_historyMessagesList);
             _historyMessagesRecycler.SetAdapter(_historyMessagesAdapter);
             _historyMessagesRecycler.SetLayoutManager(new LinearLayoutManager(this.Context));
@@ -92,14 +92,14 @@ namespace CommandEngine.Controls.Droid
             return task.Task;
         }
 
-        public void Write(Message message)
+        public void Write(CommandText message)
         {
             _historyMessagesList.Add(message);
             _historyMessagesAdapter.NotifyDataSetChanged();
             _historyMessagesRecycler.ScrollToPosition(_historyMessagesList.Count - 1);
         }
 
-        public void Update(int messageIndex, Message message)
+        public void Update(int messageIndex, CommandText message)
         {
             if (_historyMessagesList.Count <= messageIndex) return;
 
@@ -108,7 +108,7 @@ namespace CommandEngine.Controls.Droid
             _historyMessagesRecycler.ScrollToPosition(messageIndex);
         }
 
-        public void Update(int messageIndex, Func<Message, Message> messageBuilder)
+        public void Update(int messageIndex, Func<CommandText, CommandText> messageBuilder)
         {
             var oldMessage = _historyMessagesList.Count <= messageIndex
                 ? null
@@ -166,7 +166,7 @@ namespace CommandEngine.Controls.Droid
         {
             var text = _currentText.Text;
             _currentText.Text = "";
-            Write(new Message($"{(_game.GameOptions.ShowArea ? $"{_locationText.Text} {_dividerText.Text} " : "")}{text}"));
+            Write(new CommandText($"{(_game.GameOptions.ShowArea ? $"{_locationText.Text} {_dividerText.Text} " : "")}{text}"));
             if (_eventsQueue.Any() && _eventsQueue.Peek().Type == CommanderEventType.ReadLine)
             {
                 _eventsQueue.Dequeue().SetResult(text);

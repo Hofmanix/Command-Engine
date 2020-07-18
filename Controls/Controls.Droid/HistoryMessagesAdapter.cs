@@ -15,9 +15,9 @@ namespace CommandEngine.Controls.Droid
 {
     class HistoryMessagesAdapter : RecyclerView.Adapter
     {
-        private readonly List<Message> _messages;
+        private readonly List<CommandText> _messages;
 
-        public HistoryMessagesAdapter(List<Message> messages)
+        public HistoryMessagesAdapter(List<CommandText> messages)
         {
             _messages = messages;
         }
