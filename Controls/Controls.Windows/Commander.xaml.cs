@@ -25,11 +25,16 @@ namespace CommandEngine.Controls.Windows
         private readonly Queue<CommanderEvent> _eventsQueue = new Queue<CommanderEvent>();
         private double _lastActHeight;
         private double _lastCommanderPanelHeight;
+        private CommanderViewModel _model;
+
+        public string Location { get => _model.Location; set => _model.Location = value; }
 
         public Commander()
         {
+            _model = new CommanderViewModel();
             InitializeComponent();
 
+            DataContext = _model;
             CommanderTextBox.KeyDown += CommanderTextBoxOnKeyDown;
             SizeChanged += OnSizeChanged;
             RootPanel.SizeChanged += RootPanelOnSizeChanged;
@@ -60,7 +65,7 @@ namespace CommandEngine.Controls.Windows
             {
                 var text = CommanderTextBox.Text;
                 CommanderTextBox.Text = "";
-                WriteLine(CurrentLineText.Text + text);
+                this.Write(CurrentLineText.Text + text);
                 if (_eventsQueue.Any() && _eventsQueue.Peek().Type == CommanderEventType.ReadLine)
                 {
                     _eventsQueue.Dequeue().SetResult(text);
@@ -73,52 +78,36 @@ namespace CommandEngine.Controls.Windows
             CommanderTextBox.Focus();
         }
 
+        #region ICommander
         public Task<string> ReadCommand()
-        {
-            var task = new TaskCompletionSource<string>();
-            _eventsQueue.Enqueue(new CommanderEvent(task));
-            return task.Task;
-        }
-
-        public void UpdateLine(int lineIndex, string message)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateLine(int lineIndex, Func<string, string> messageBuilder)
+        public void Write(CommandText message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(int messageIndex, CommandText message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(int messageIndex, Func<CommandText, CommandText> messageBuilder)
         {
             throw new NotImplementedException();
         }
 
         public void Clear()
         {
-            PreviousText.Text = "";
+            throw new NotImplementedException();
         }
 
-        public void Write(string message)
+        public void OnGameCreated(IGame game)
         {
-            if (message.EndsWith(System.Environment.NewLine))
-            {
-                PreviousText.Text += message;
-            }
-            else
-            {
-                var lines = message.Split(new [] { System.Environment.NewLine }, StringSplitOptions.None);
-                if (!lines.Any()) return;
-
-                CurrentLineText.Text = lines.Last();
-                foreach (var line in lines.Take(lines.Length - 1))
-                {
-                    WriteLine(line);
-                }
-            }
-
-            CommanderScrollView.ScrollToEnd();
+            throw new NotImplementedException();
         }
-
-        public void WriteLine(string message)
-        {
-            Write($"{message}{System.Environment.NewLine}");
-        }
+        #endregion
     }
 }

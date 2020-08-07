@@ -6,15 +6,15 @@
              xmlns:local="clr-namespace:CommandEngine.Controls.Windows"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel x:Name="RootPanel" Margin="5, 0, 5, 0">
-        <StackPanel x:Name="ScrollPanelView">
+    <DockPanel x:Name="RootPanel" Margin="5, 0, 5, 0">
+        <StackPanel x:Name="ScrollPanelView" DockPanel.Dock="Top">
             <ScrollViewer x:Name="CommanderScrollView" VerticalScrollBarVisibility="Auto">
-                <TextBlock x:Name="PreviousText" TextWrapping="Wrap"/>
+                <ListView/>
             </ScrollViewer>
         </StackPanel>
-        <DockPanel x:Name="CommanderPanel">
+        <DockPanel x:Name="CommanderPanel" DockPanel.Dock="Bottom">
             <TextBlock x:Name="CurrentLineText" DockPanel.Dock="Left"/>
             <TextBox x:Name="CommanderTextBox" BorderBrush="Transparent" BorderThickness="0" DockPanel.Dock="Right"/>
         </DockPanel>
-    </StackPanel>
+    </DockPanel>
 </UserControl>
