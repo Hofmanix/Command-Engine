@@ -1,6 +1,0 @@
-<resources>
-    <string name="hello">Hello World, Click Me!</string>
-    <string name="app_name">Android.Console</string>
-    <string name="enter_command">Enter command</string>
-    <string name="default_divider">></string>
-</resources>

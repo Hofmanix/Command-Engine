@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="CommandEngine.Controls.Commander"
+    x:Name="CommanderView"
+    Padding="5">
+    <ContentView.Content>
+        <Grid RowSpacing="0" ColumnSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ListView x:Name="CommandsHistoryList"
+                      Grid.Row="0"
+                      ItemsSource="{Binding Messages}"
+                      HasUnevenRows="True"
+                      SelectionMode="None"
+                      SeparatorVisibility="None"
+                      Margin="0">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding Text}" FontSize="{Binding BindingContext.TextSize, Source={x:Reference CommanderView}}"/>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <StackLayout Grid.Row="1" Orientation="Horizontal" HorizontalOptions="Fill" Margin="0" Padding="0">
+                <Label Text="{Binding Location}" IsVisible="{Binding LocationVisible}" FontSize="{Binding TextSize}" VerticalOptions="Center"/>
+                <Label Text="{Binding Separator}" IsVisible="{Binding LocationVisible}" FontSize="{Binding TextSize}" VerticalOptions="Center"/>
+                <Entry x:Name="CommandEntry" Text="{Binding Command}" Completed="Entry_Completed" HorizontalOptions="FillAndExpand" FontSize="{Binding TextSize}" BackgroundColor="Transparent" Margin="0"/>
+            </StackLayout>
+        </Grid>
+    </ContentView.Content>
+</ContentView>

@@ -40,9 +40,21 @@ namespace CommandEngine
             }
         }
 
+        public int TextSize
+        {
+            get => _textSize;
+            set
+            {
+                if (_textSize == value) return;
+                _textSize = value;
+                NotifyPropertyChanged(nameof(TextSize));
+            }
+        }
+
         private MethodParameterNaming _methodParameterNaming;
         private bool _showArea = true;
         private string _areaDivider = ">";
+        private int _textSize = 14;
 
         private void NotifyPropertyChanged(string propertyName)
         {

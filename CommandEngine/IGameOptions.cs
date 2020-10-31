@@ -8,5 +8,6 @@ namespace CommandEngine
         MethodParameterNaming MethodParametersNaming { get; set; }
         bool ShowArea { get; set; }
         string AreaDivider { get; set; }
+        int TextSize { get; set; }
     }
 }

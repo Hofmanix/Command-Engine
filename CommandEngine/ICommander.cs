@@ -9,8 +9,8 @@ namespace CommandEngine
         string Location { get; set; }
         Task<string> ReadCommand();
         void Write(CommandText message);
-        void Update(int messageIndex, CommandText message);
-        void Update(int messageIndex, Func<CommandText, CommandText> messageBuilder);
+        void UpdateLast(CommandText message);
+        void UpdateLast(Func<CommandText, CommandText> messageBuilder);
         void Clear();
         void OnGameCreated(IGame game);
     }
@@ -20,11 +20,11 @@ namespace CommandEngine
         public static void Write(this ICommander commander, string message)
             => commander.Write(new CommandText(message));
 
-        public static void Update(this ICommander commander, int messageIndex, string message)
-            => commander.Update(messageIndex, new CommandText(message));
+        public static void UpdateLast(this ICommander commander, string message)
+            => commander.UpdateLast(new CommandText(message));
 
-        public static void Update(this ICommander commander, int messageIndex, Func<string, string> messageBuilder)
-            => commander.Update(messageIndex, message =>
+        public static void UpdateLast(this ICommander commander, Func<string, string> messageBuilder)
+            => commander.UpdateLast(message =>
             {
                 message.Text = messageBuilder(message.Text);
                 return message;
